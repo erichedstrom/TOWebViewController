@@ -103,6 +103,13 @@
 @property (nonatomic,assign)    BOOL showActionButton;
 
 /**
+ Shows the iOS 'Reload' button, which when tapped, reloads the current page.
+
+ Default value is YES.
+ */
+@property (nonatomic,assign)    BOOL showReloadButton;
+
+/**
  Shows the Done button when presented modally. When tapped, it dismisses the view controller.
 
  Default value is YES.

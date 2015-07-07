@@ -249,6 +249,7 @@ static const float kAfterInteractiveMaxProgressValue    = 0.9f;
 {
     //Direct ivar reference since we don't want to trigger their actions yet
     _showActionButton = YES;
+    _showReloadButton = YES;
     _showDoneButton   = YES;
     _buttonSpacing    = (IPAD == NO) ? NAVIGATION_BUTTON_SPACING : NAVIGATION_BUTTON_SPACING_IPAD;
     _buttonWidth      = NAVIGATION_BUTTON_WIDTH;
@@ -355,16 +356,17 @@ static const float kAfterInteractiveMaxProgressValue    = 0.9f;
     [self.forwardButton setImage:forwardButtonImage forState:UIControlStateNormal];
     
     //set up the reload button
-    if (self.reloadStopButton == nil) {
-        self.reloadStopButton = [UIButton buttonWithType:buttonType];
-        [self.reloadStopButton setFrame:buttonFrame];
-        [self.reloadStopButton setShowsTouchWhenHighlighted:YES];
+    if (self.showReloadButton) {
+        if (self.reloadStopButton == nil) {
+            self.reloadStopButton = [UIButton buttonWithType:buttonType];
+            [self.reloadStopButton setFrame:buttonFrame];
+            [self.reloadStopButton setShowsTouchWhenHighlighted:YES];
+        }
+        self.reloadIcon = [UIImage TOWebViewControllerIcon_refreshButtonWithAttributes:self.buttonThemeAttributes];
+        self.stopIcon   = [UIImage TOWebViewControllerIcon_stopButtonWithAttributes:self.buttonThemeAttributes];
+        [self.reloadStopButton setImage:self.reloadIcon forState:UIControlStateNormal];
     }
-    
-    self.reloadIcon = [UIImage TOWebViewControllerIcon_refreshButtonWithAttributes:self.buttonThemeAttributes];
-    self.stopIcon   = [UIImage TOWebViewControllerIcon_stopButtonWithAttributes:self.buttonThemeAttributes];
-    [self.reloadStopButton setImage:self.reloadIcon forState:UIControlStateNormal];
-    
+
     //if desired, show the action button
     if (self.showActionButton) {
         if (self.actionButton == nil) {
@@ -381,9 +383,13 @@ static const float kAfterInteractiveMaxProgressValue    = 0.9f;
 {
     CGRect buttonFrame = CGRectZero;
     buttonFrame.size = NAVIGATION_BUTTON_SIZE;
-    
-    CGFloat width = (self.buttonWidth*3)+(self.buttonSpacing*2);
-    if (self.showActionButton)
+
+    CGFloat width = (self.buttonWidth*2)+(self.buttonSpacing);
+
+    if (self.showReloadButton ^ self.showActionButton) {
+        width = (self.buttonWidth*3)+(self.buttonSpacing*2);
+    }
+    if (self.showReloadButton && self.showActionButton)
         width = (self.buttonWidth*4)+(self.buttonSpacing*3);
     
     //set up the icons for the navigation bar
@@ -399,12 +405,14 @@ static const float kAfterInteractiveMaxProgressValue    = 0.9f;
     self.forwardButton.frame = buttonFrame;
     [iconsContainerView addSubview:self.forwardButton];
     buttonFrame.origin.x += (self.buttonWidth + self.buttonSpacing);
-    
-    //add the reload button if the action button is hidden
-    self.reloadStopButton.frame = buttonFrame;
-    [iconsContainerView addSubview:self.reloadStopButton];
-    buttonFrame.origin.x += (self.buttonWidth + self.buttonSpacing);
-    
+
+    if (self.showReloadButton) {
+        //add the reload button if the action button is hidden
+        self.reloadStopButton.frame = buttonFrame;
+        [iconsContainerView addSubview:self.reloadStopButton];
+        buttonFrame.origin.x += (self.buttonWidth + self.buttonSpacing);
+    }
+
     //add the action button
     if (self.showActionButton) {
         self.actionButton.frame = buttonFrame;
