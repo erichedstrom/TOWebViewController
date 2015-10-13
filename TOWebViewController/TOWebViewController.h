@@ -168,4 +168,9 @@
  */
 @property (nonatomic,assign)    CGFloat buttonBevelOpacity;
 
+/**
+ Pass through delegate calls to the delegate
+ */
+@property (nonatomic, weak)     id<UIWebViewDelegate> delegate;
+
 @end

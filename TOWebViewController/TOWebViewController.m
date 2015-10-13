@@ -739,13 +739,16 @@ static const float kAfterInteractiveMaxProgressValue    = 0.9f;
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
 {
     BOOL shouldStart = YES;
+
     
     //If a request handler has been set, check to see if we should go ahead
-    if (self.shouldStartLoadRequestHandler)
+    if (self.shouldStartLoadRequestHandler) {
         shouldStart = self.shouldStartLoadRequestHandler(request, navigationType);
-    
-    //TODO: Implement TOModalWebViewController Delegate callback
-    
+    }
+    else if ([self.delegate respondsToSelector:@selector(webView:shouldStartLoadWithRequest:navigationType:)]) {
+      shouldStart = [self.delegate webView:webView shouldStartLoadWithRequest:request navigationType:navigationType];
+    }
+
     //if the URL is the load completed notification from JavaScript
     if ([request.URL.absoluteString isEqualToString:kCompleteRPCURL] || !shouldStart) {
         [self finishLoadProgress];
@@ -786,6 +789,10 @@ static const float kAfterInteractiveMaxProgressValue    = 0.9f;
     
     //update the navigation bar buttons
     [self refreshButtonsState];
+
+    if ([self.delegate respondsToSelector:@selector(webViewDidStartLoad:)]) {
+        [self.delegate webViewDidStartLoad:webView];
+    }
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView
@@ -794,8 +801,13 @@ static const float kAfterInteractiveMaxProgressValue    = 0.9f;
     [self refreshButtonsState];
 
     //see if we can set the proper page title at this point
-    if (self.showPageTitles)
+    if (self.showPageTitles) {
         self.title = [self.webView stringByEvaluatingJavaScriptFromString:@"document.title"];
+    }
+
+    if ([self.delegate respondsToSelector:@selector(webViewDidFinishLoad:)]) {
+        [self.delegate webViewDidFinishLoad:webView];
+    }
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error
@@ -803,6 +815,10 @@ static const float kAfterInteractiveMaxProgressValue    = 0.9f;
     self.loadingBarView.alpha = 0.0f;
     [self handleLoadRequestCompletion];
     [self refreshButtonsState];
+
+    if ([self.delegate respondsToSelector:@selector(webView:didFailLoadWithError:)]) {
+        [self.delegate webView:webView didFailLoadWithError:error];
+    }
 }
 
 #pragma mark -
